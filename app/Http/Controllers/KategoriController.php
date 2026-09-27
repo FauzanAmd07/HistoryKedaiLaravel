@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreKategoriRequest;
 use App\Models\Kategori;
 use Illuminate\Http\Request;
 
@@ -9,7 +10,10 @@ class KategoriController extends Controller
 {
     public function index()
     {
-        $kategoris = Kategori::where('status_kategori', 'Tersedia')->orderByDesc('id_kategori')->get();
+        $kategoris = Kategori::where('status_kategori', 'Tersedia')
+            ->orderByDesc('id_kategori')
+            ->get();
+
         return view('dashboard.kategori.index', compact('kategoris'));
     }
 
@@ -18,10 +22,9 @@ class KategoriController extends Controller
         return view('dashboard.kategori.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreKategoriRequest $request)
     {
-        $request->validate(['nama_kategori' => 'required|string|max:100|unique:kategori']);
-        Kategori::create(['nama_kategori' => $request->nama_kategori]);
+        Kategori::create($request->validated());
         return redirect()->route('kategori.index')->with('success', 'Kategori berhasil ditambahkan!');
     }
 
@@ -32,7 +35,10 @@ class KategoriController extends Controller
 
     public function update(Request $request, Kategori $kategori)
     {
-        $request->validate(['nama_kategori' => 'required|string|max:100|unique:kategori,nama_kategori,' . $kategori->id_kategori . ',id_kategori']);
+        $request->validate([
+            'nama_kategori' => 'required|string|max:100|unique:kategori,nama_kategori,' . $kategori->id_kategori . ',id_kategori',
+        ]);
+
         $kategori->update(['nama_kategori' => $request->nama_kategori]);
         return redirect()->route('kategori.index')->with('success', 'Kategori berhasil diperbarui!');
     }
